@@ -3,7 +3,8 @@ __pycache__/
 *.py[codz]
 *$py.class
 
-/vlm-venv
+/vlm-venv/
+/rustbpe/target/
 # C extensions
 *.so
 
