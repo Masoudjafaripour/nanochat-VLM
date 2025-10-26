@@ -12,12 +12,16 @@ python -m scripts.base_train --depth=4 --max_seq_len=512 --device_batch_size=1 -
 """
 
 import os
+os.environ["TORCH_COMPILE_DISABLE"] = "1" # disable torch compile 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import time
 from contextlib import nullcontext
 
 import wandb
 import torch
+
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 from nanochat_vlm.gpt import GPT, GPTConfig
 from nanochat_vlm.dataloader import tokenizing_distributed_data_loader
@@ -62,7 +66,7 @@ sample_every = 2000 # every how many steps to sample from the model
 model_tag = "" # optionally override the model tag for the output checkpoint directory name
 # now allow CLI to override the settings via the configurator lol
 config_keys = [k for k,v in globals().items() if not k.startswith('_') and isinstance(v, (int, float, bool, str))]
-exec(open(os.path.join('nanochat', 'configurator.py')).read()) # overrides from command line or config file
+exec(open(os.path.join('nanochat_vlm', 'configurator.py')).read()) # overrides from command line or config file
 user_config = {k: globals()[k] for k in config_keys} # will be useful for logging
 # -----------------------------------------------------------------------------
 
