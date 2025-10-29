@@ -76,3 +76,28 @@ Based on work by Andrej Karpathy (nanochat, MIT License)
 ### 🌟 Vision
 
 Make multimodality **understandable**, **teachable**, and **hackable** — one milestone at a time.
+
+### My issues: 
+## Tokenizer Setup
+
+**Issue:** `FileNotFoundError: tokenizer.pkl not found in ~/.cache/nanochat/tokenizer/`
+
+**Cause:** The tokenizer must be trained once and cached. When moving between machines (Windows ↔ Linux), the cache doesn't transfer automatically.
+
+**Solution:** Copy tokenizer files from the machine where it was trained to `~/.cache/nanochat/tokenizer/` on the new machine.
+
+**Files:**
+- `tokenizer.pkl` - Trained BPE tokenizer (vocabulary, merge rules, special tokens)
+- `token_bytes.pt` - Byte representations for bits-per-byte evaluation metric
+
+**Commands:**
+```bash
+# Create cache directory
+mkdir -p ~/.cache/nanochat/tokenizer/
+
+# Copy files (adjust source path as needed)
+cp /path/to/tokenizer.pkl ~/.cache/nanochat/tokenizer/
+cp /path/to/token_bytes.pt ~/.cache/nanochat/tokenizer/
+```
+
+**Note:** Train the tokenizer once using the training script before first model training. The cached files can be reused across training runs.
