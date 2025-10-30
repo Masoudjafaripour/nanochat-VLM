@@ -12,7 +12,7 @@ python -m scripts.base_train --depth=4 --max_seq_len=512 --device_batch_size=1 -
 """
 
 import os
-os.environ["TORCH_COMPILE_DISABLE"] = "1" # disable torch compile 
+# os.environ["TORCH_COMPILE_DISABLE"] = "1" # Masoud: disable torch compile 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 import time
 from contextlib import nullcontext
