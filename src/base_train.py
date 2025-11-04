@@ -323,7 +323,7 @@ print0(f"Total training time: {total_training_time/60:.2f}m")
 print0(f"Minimum validation bpb: {min_val_bpb:.4f}")
 
 # Log to report
-from nanochat.report import get_report
+from nanochat_vlm.report import get_report
 get_report().log(section="Base model training", data=[
     user_config, # CLI args
     { # stats about the training setup
