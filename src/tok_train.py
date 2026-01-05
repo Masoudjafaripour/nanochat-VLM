@@ -11,7 +11,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
 
-from nanochat_vlm.tokenizer import RustBPETokenizer
+from nanochat_vlm.tokenizer import RustBPETokenizer #why RustBPE? because it's fast? 
 from nanochat_vlm.common import get_base_dir
 from nanochat_vlm.dataset import parquets_iter_batched
 
