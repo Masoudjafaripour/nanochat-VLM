@@ -53,7 +53,8 @@ This project is designed for **learning, research, and hackability**, not scale.
 
 ### Secondary Path (Notebooks – Supporting, Not Primary)
 
-A small set of notebooks is provided to:
+A small set of notebooks is provided in  
+👉 **[notebooks/](https://github.com/Masoudjafaripour/nanochat-VLM/tree/main/notebooks)**
 
 * inspect vision tokenization,
 * test projector and fusion logic,
