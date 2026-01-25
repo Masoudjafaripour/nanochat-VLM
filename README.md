@@ -1,6 +1,7 @@
 # 🧠 nanochat-VLM
 
-### A minimal Vision-Language Model trained end-to-end in the spirit of Karpathy’s **nanochat**
+### A minimal Vision-Language Model trained end-to-end in the spirit of Karpathy’s **[nanochat](https://github.com/karpathy/nanochat)**
+
 
 **nanochat-VLM** extends the original **nanochat** idea toward multimodality: training a small but complete **Vision-Language Model (VLM)** with the same philosophy—minimal code, full ownership, and clear learning value.
 
@@ -67,12 +68,15 @@ These notebooks **do not replace** the main training pipeline and are **not the 
 
 ```
 nanochat-VLM/
+├── dev/                    # experiments, data prep, and utilities
+├── nanochat_vlm/           # core library (tokenizer, dataset, model components)
+├── rustbpe/                # Rust-based BPE tokenizer
 ├── src/                    # main training & evaluation scripts (primary path)
 │   ├── tok_train.py        # tokenizer training
 │   ├── tok_eval.py         # tokenizer evaluation
-│   ├── base_train.py       # text LM pretraining
-│   ├── mid_train.py        # chat/multimodal alignment
-│   ├── chat_sft.py         # supervised finetuning
+│   ├── base_train.py       # text-only LM pretraining
+│   ├── mid_train.py        # chat & multimodal alignment
+│   ├── chat_sft.py         # supervised fine-tuning
 │   ├── chat_eval.py        # evaluation
 │   └── chat_web.py         # chat UI
 ├── notebooks/              # secondary, exploratory VLM notebooks
@@ -81,7 +85,8 @@ nanochat-VLM/
 │   ├── vlm_fusion.ipynb
 │   └── ...
 ├── tests/                  # small unit tests
-└── README.md               # you are here
+├── speedrun.sh             # end-to-end nanochat-style training script
+└── README.md               # project overview
 ```
 
 ---
