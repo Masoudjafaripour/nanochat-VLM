@@ -3,7 +3,7 @@
 ### A minimal Vision-Language Model trained end-to-end in the spirit of Karpathy’s **[nanochat](https://github.com/karpathy/nanochat)**
 
 
-**nanochat-VLM** extends the original **nanochat** idea toward multimodality: training a small but complete **Vision-Language Model (VLM)** with the same philosophy—minimal code, full ownership, and clear learning value.
+**nanochat-VLM** extends the original **nanochat** idea toward multimodality: training a small but complete **Vision-Language Model (VLM)** with the same philosophy—minimal code, full ownership, and clear learning value (hopefully with similar cost of training).
 
 The **primary goal** of this repo is to **train a VLM end-to-end using nanochat-style scripts** (tokenizer → LM → multimodal training), not just to demo inference.
 A small set of notebooks is included as a **secondary, exploratory path** to understand and validate VLM components in isolation.
