@@ -14,6 +14,7 @@ sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 from nanochat_vlm.tokenizer import RustBPETokenizer #why RustBPE? because it's fast? 
 from nanochat_vlm.common import get_base_dir
 from nanochat_vlm.dataset import parquets_iter_batched
+from nanochat_vlm.tokenizer_vlm import SPECIAL_TOKENS_VLM
 
 # -----------------------------------------------------------------------------
 # Parse command line arguments
@@ -51,7 +52,7 @@ text_iter = text_iterator()
 # -----------------------------------------------------------------------------
 # Train the tokenizer
 t0 = time.time()
-tokenizer = RustBPETokenizer.train_from_iterator(text_iter, args.vocab_size)
+tokenizer = RustBPETokenizer.train_from_iterator(text_iter, args.vocab_size, special_tokens=SPECIAL_TOKENS_VLM)
 t1 = time.time()
 train_time = t1 - t0
 print(f"Training time: {train_time:.2f}s")
