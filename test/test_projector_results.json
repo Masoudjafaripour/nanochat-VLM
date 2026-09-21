@@ -1,0 +1,17 @@
+[
+  {
+    "image": "test/assets/sample.png",
+    "patch_size": 16,
+    "num_patches": 196,
+    "vision_dim": 768,
+    "lm_dim": 768,
+    "output_shape": [
+      1,
+      196,
+      768
+    ],
+    "output_mean": 2.2301056556983667e-09,
+    "output_std": 0.9999720454216003,
+    "output_norm": 27.711946487426758
+  }
+]
