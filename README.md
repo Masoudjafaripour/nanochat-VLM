@@ -10,6 +10,8 @@ A small set of notebooks is included as a **secondary, exploratory path** to und
 
 This project is designed for **learning, research, and hackability**, not scale.
 
+![VLM architecture: image patches through a frozen vision encoder and trained projector, fused with text tokens into the nanochat GPT decoder](assets/vlm_architecture.png)
+
 ---
 
 ## 🚀 Goals
