@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>nanochat-VLM</title>
+<style>
+  :root {
+    --bg: #0b0d0b;
+    --bg-panel: #11140f;
+    --border: #2a3a26;
+    --text: #ededed;
+    --text-dim: #9aa39a;
+    --accent-green: #6fbf73;
+    --accent-orange: #d98a4f;
+    --accent-teal: #6fb3ac;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+  }
+  a { color: var(--accent-teal); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px; }
+
+  header.hero {
+    padding: 72px 0 48px;
+    text-align: center;
+    border-bottom: 1px solid var(--border);
+  }
+  header.hero h1 {
+    font-size: 2.4rem;
+    margin: 0 0 12px;
+  }
+  header.hero p.tagline {
+    color: var(--text-dim);
+    font-size: 1.05rem;
+    max-width: 640px;
+    margin: 0 auto 28px;
+  }
+  .btn-row { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border);
+    font-size: 0.95rem;
+  }
+  .btn.primary {
+    background: var(--accent-green);
+    color: #0b0d0b;
+    border-color: var(--accent-green);
+    font-weight: 600;
+  }
+  .btn.primary:hover { text-decoration: none; opacity: 0.9; }
+
+  section { padding: 56px 0; border-bottom: 1px solid var(--border); }
+  section:last-of-type { border-bottom: none; }
+  h2 {
+    font-size: 1.5rem;
+    margin: 0 0 24px;
+    color: var(--text);
+  }
+  h2 .emoji { margin-right: 8px; }
+
+  .architecture-img {
+    width: 100%;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    display: block;
+    margin-top: 8px;
+  }
+
+  ul.goals { padding-left: 20px; margin: 0; }
+  ul.goals li { margin-bottom: 10px; color: var(--text-dim); }
+  ul.goals li strong { color: var(--text); }
+
+  .pipeline-step {
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+    border-radius: 10px;
+    padding: 18px 20px;
+    margin-bottom: 14px;
+  }
+  .pipeline-step .step-label {
+    display: inline-block;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent-orange);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+  .pipeline-step p { margin: 0; color: var(--text-dim); font-size: 0.95rem; }
+  .pipeline-step code {
+    background: rgba(255,255,255,0.06);
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.85em;
+  }
+  .status-tag {
+    display: inline-block;
+    font-size: 0.72rem;
+    padding: 2px 8px;
+    border-radius: 999px;
+    margin-left: 8px;
+    vertical-align: middle;
+  }
+  .status-tag.done { background: rgba(111,191,115,0.15); color: var(--accent-green); border: 1px solid rgba(111,191,115,0.4); }
+  .status-tag.progress { background: rgba(217,138,79,0.15); color: var(--accent-orange); border: 1px solid rgba(217,138,79,0.4); }
+
+  .milestones { list-style: none; padding: 0; margin: 0; counter-reset: milestone; }
+  .milestones li {
+    counter-increment: milestone;
+    position: relative;
+    padding-left: 40px;
+    margin-bottom: 20px;
+    color: var(--text-dim);
+  }
+  .milestones li::before {
+    content: counter(milestone);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: var(--text);
+  }
+  .milestones li strong { color: var(--text); }
+
+  .links-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 14px;
+  }
+  .link-card {
+    border: 1px solid var(--border);
+    background: var(--bg-panel);
+    border-radius: 10px;
+    padding: 16px 18px;
+  }
+  .link-card .title { font-weight: 600; margin-bottom: 4px; display: block; }
+  .link-card .desc { color: var(--text-dim); font-size: 0.88rem; }
+
+  footer {
+    padding: 32px 0 60px;
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <h1>🧠 nanochat-VLM</h1>
+    <p class="tagline">
+      A minimal Vision-Language Model trained end-to-end in the spirit of Karpathy's
+      <a href="https://github.com/karpathy/nanochat">nanochat</a> — minimal code, full ownership,
+      clear learning value.
+    </p>
+    <div class="btn-row">
+      <a class="btn primary" href="https://github.com/Masoudjafaripour/nanochat-VLM">View on GitHub</a>
+      <a class="btn" href="https://github.com/Masoudjafaripour/nanochat-VLM/tree/main/notebooks">Notebooks</a>
+      <a class="btn" href="https://github.com/Masoudjafaripour/nanochat-VLM#readme">Full README</a>
+    </div>
+  </div>
+</header>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🧩</span>Architecture</h2>
+    <p style="color: var(--text-dim); margin-top: -8px;">
+      Image patches flow through a frozen vision encoder and a trained projector,
+      get fused with text tokens, and attend jointly inside the nanochat GPT decoder.
+    </p>
+    <img class="architecture-img" src="assets/vlm_architecture.png"
+         alt="VLM architecture: image patches through a frozen vision encoder and trained projector, fused with text tokens into the nanochat GPT decoder">
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🚀</span>Goals</h2>
+    <ul class="goals">
+      <li><strong>Rebuild the core nanochat LLM pipeline</strong> — tokenization → transformer → training.</li>
+      <li><strong>Extend it to a Vision-Language Model</strong> using a vision encoder + fusion.</li>
+      <li><strong>Train script-first</strong>, nanochat-style — not notebook-first.</li>
+      <li><strong>Keep the system transparent, minimal, and hackable.</strong></li>
+      <li><strong>Enable experimentation on limited compute</strong> — single GPU or small server.</li>
+    </ul>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">⚙️</span>Pipeline</h2>
+
+    <div class="pipeline-step">
+      <span class="step-label">1 · Tokenizer <span class="status-tag done">done</span></span>
+      <p>Byte-level BPE (<code>rustbpe</code> + <code>tiktoken</code>), trained directly on the pretraining corpus.
+      Special tokens including <code>&lt;|image|&gt;</code> are reserved up front so the vocabulary can carry image placeholders.</p>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="step-label">2 · Base Language Model <span class="status-tag done">done</span></span>
+      <p>GPT-style decoder-only Transformer — rotary embeddings, QK-norm, untied embeddings,
+      ReLU² MLP, parameter-free RMSNorm, Multi-Query Attention. Optimized with Muon + AdamW.</p>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="step-label">3 · Vision → Language Bridge <span class="status-tag progress">in progress</span></span>
+      <p>A pretrained vision encoder (CLIP/ViT/DINO) produces patch embeddings, mapped into the LM's
+      embedding space by a linear/MLP projector. Image tokens are prepended to the text sequence
+      with a matching attention mask. Currently developed in the notebooks before promotion into <code>src/</code>.</p>
+    </div>
+
+    <div class="pipeline-step">
+      <span class="step-label">4 · Training Stages <span class="status-tag progress">planned</span></span>
+      <p>Tokenizer training → base pretraining → vision-projector alignment → multimodal fusion training → chat SFT / eval.
+      Model size scales with a single <code>depth</code> knob — same scripts run a tiny CPU model or a large multi-GPU model.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">📚</span>Learning Milestones</h2>
+    <ol class="milestones">
+      <li><strong>Tokenizer (Text)</strong> — train and evaluate a BPE tokenizer on large-scale text.</li>
+      <li><strong>Base Language Model</strong> — GPT-style decoder-only transformer from scratch, validated with loss curves and benchmarks.</li>
+      <li><strong>Vision Encoder Integration</strong> — pretrained vision encoder + projector into the LM embedding space.</li>
+      <li><strong>Multimodal Training</strong> — fuse image and text tokens, train the VLM end-to-end.</li>
+      <li><strong>Multimodal Chat &amp; Evaluation</strong> — image + text chat, evaluated on small VLM benchmarks.</li>
+    </ol>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <h2><span class="emoji">🔗</span>Explore</h2>
+    <div class="links-grid">
+      <a class="link-card" href="https://github.com/Masoudjafaripour/nanochat-VLM">
+        <span class="title">Source code</span>
+        <span class="desc">Tokenizer, GPT model, training scripts</span>
+      </a>
+      <a class="link-card" href="https://github.com/Masoudjafaripour/nanochat-VLM/tree/main/notebooks">
+        <span class="title">Notebooks</span>
+        <span class="desc">Vision tokenization → fusion → generation, step by step</span>
+      </a>
+      <a class="link-card" href="https://github.com/Masoudjafaripour/nanochat-VLM#readme">
+        <span class="title">Setup &amp; how to run</span>
+        <span class="desc">Install, train the tokenizer, pretrain the base LM</span>
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  MIT License · Based on work by Andrej Karpathy (<a href="https://github.com/karpathy/nanochat">nanochat</a>)
+</footer>
+
+</body>
+</html>
