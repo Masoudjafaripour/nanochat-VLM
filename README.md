@@ -1,8 +1,15 @@
 # 🧠 nanochat-VLM
 
-### A minimal Vision-Language Model trained end-to-end in the spirit of Karpathy’s **[nanochat](https://github.com/karpathy/nanochat)**
+**A minimal Vision-Language Model, trained end-to-end, in the spirit of Karpathy's [nanochat](https://github.com/karpathy/nanochat).**
+Train in Python, run in Rust, explore in notebooks — minimal code, full ownership, clear learning value.
 
+![live demo](https://img.shields.io/badge/live_demo-browser-6fbf73) ![tokenizer](https://img.shields.io/badge/tokenizer-RustBPE-d98a4f) ![LM](https://img.shields.io/badge/LM-nanochat_GPT-6f9bd1) ![vision](https://img.shields.io/badge/vision-CLIP%20%7C%20ViT%20%7C%20DINO-6f9bd1) ![inference](https://img.shields.io/badge/inference-Rust-7c5cbf) ![license](https://img.shields.io/badge/license-MIT-c0392b)
 
+[Overview](#overview) · [Goals](#goals) · [Milestones](#milestones) · [Pipeline](#pipeline) · [Folder Structure](#folder-structure) · [Setup](#setup) · [How to Run](#how-to-run) · [Rust](#rust) · [License](#license)
+
+---
+
+<a id="overview"></a>
 **nanochat-VLM** brings nanochat to multimodality. It trains a small but complete **Vision-Language Model (VLM)** with the same philosophy: minimal code, full ownership, clear learning value.
 
 - **Train in Python:** tokenizer → language model → vision projector → multimodal training, as nanochat-style scripts. This is the primary goal.
@@ -15,6 +22,7 @@ Built for **learning, research, and hackability**, not scale.
 
 ---
 
+<a id="goals"></a>
 ## 🚀 Goals
 
 * Rebuild the **core nanochat LLM pipeline** (tokenization → transformer → training).
@@ -25,6 +33,7 @@ Built for **learning, research, and hackability**, not scale.
 
 ---
 
+<a id="milestones"></a>
 ## 📚 Learning & Training Milestones
 
 ### Primary Path (Main Objective)
@@ -70,6 +79,7 @@ These notebooks **do not replace** the main training pipeline and are **not the 
 
 ---
 
+<a id="pipeline"></a>
 ## 🧠 Algorithm / Pipeline
 
 **1. Tokenizer.** A byte-level BPE tokenizer (via [`rustbpe`](rustbpe/), a small Rust training routine, exported for fast inference through `tiktoken`/HuggingFace `tokenizers`) trained directly on the pretraining corpus. Special tokens (`<|bos|>`, `<|user_start|>`, `<|assistant_start|>`, `<|image|>`, …) are reserved up front in [`nanochat_vlm/tokenizer_vlm.py`](nanochat_vlm/tokenizer_vlm.py) so the same vocabulary can later carry image placeholders.
@@ -82,6 +92,7 @@ These notebooks **do not replace** the main training pipeline and are **not the 
 
 ---
 
+<a id="folder-structure"></a>
 ## 🧩 Folder Structure
 
 ```
@@ -116,6 +127,7 @@ nanochat-VLM/
 
 ---
 
+<a id="setup"></a>
 ## 🛠️ Setup
 
 ```bash
@@ -135,6 +147,7 @@ By default all caches/checkpoints/data go to `~/.cache/nanochat` (override with 
 
 ---
 
+<a id="how-to-run"></a>
 ## ▶️ How to Run
 
 ```bash
@@ -162,6 +175,7 @@ python -m src.base_eval --max-per-task 100
 
 ---
 
+<a id="rust"></a>
 ## 🦀 Rust Inference & Systems
 
 Python trains the model. [`rust/`](rust/) runs it fast on CPU, on a server, or in the browser: preprocessing, data loading, a Candle inference engine with a KV cache, a CLI, a REST API and WASM. Outputs match PyTorch (preprocessing is bit-exact, logits within ~1e-6).
@@ -190,6 +204,7 @@ Details, tests and full results: [`rust/README.md`](rust/README.md).
 
 ---
 
+<a id="license"></a>
 ## ⚙️ License
 
 MIT License
