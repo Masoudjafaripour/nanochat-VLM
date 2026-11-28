@@ -2700,6 +2700,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "serde_yaml"
+version = "0.9.34+deprecated"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6a8b1a1a2ebf674015cc02edccce75287f1a0130d394307b36743c2f5d504b47"
+dependencies = [
+ "indexmap",
+ "itoa",
+ "ryu",
+ "serde",
+ "unsafe-libyaml",
+]
+
+[[package]]
 name = "sha2"
 version = "0.10.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3159,6 +3172,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7264e107f553ccae879d21fbea1d6724ac785e8c3bfc762137959b5802826ef3"
 
 [[package]]
+name = "unsafe-libyaml"
+version = "0.2.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "673aac59facbab8a9007c7f6108d11f63b603f7cabff99fabf650fea5c32b861"
+
+[[package]]
 name = "untrusted"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3270,6 +3289,7 @@ dependencies = [
  "clap",
  "serde_json",
  "vlm-dataprep",
+ "vlm-eval",
  "vlm-inference",
  "vlm-preprocessing",
 ]
@@ -3296,6 +3316,20 @@ dependencies = [
  "rayon",
  "serde_json",
  "vlm-tokenizer",
+]
+
+[[package]]
+name = "vlm-eval"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "candle-core",
+ "candle-nn",
+ "serde",
+ "serde_json",
+ "serde_yaml",
+ "vlm-dataprep",
+ "vlm-inference",
 ]
 
 [[package]]

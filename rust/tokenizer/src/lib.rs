@@ -82,6 +82,10 @@ impl Tokenizer {
         self.bos_id
     }
 
+    pub fn is_special(&self, id: u32) -> bool {
+        self.special_decoder.contains_key(&id)
+    }
+
     pub fn special_id(&self, name: &str) -> Option<u32> {
         self.special.get(name).copied()
     }

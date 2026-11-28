@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["preprocessing", "tokenizer", "data", "dataprep", "inference", "bindings", "cli", "server", "benchmarks", "wasm"]
+members = ["preprocessing", "tokenizer", "data", "dataprep", "inference", "eval", "bindings", "cli", "server", "benchmarks", "wasm"]
 
 [workspace.package]
 version = "0.1.0"

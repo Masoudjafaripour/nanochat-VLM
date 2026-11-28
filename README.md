@@ -172,6 +172,20 @@ Python trains the model. [`rust/`](rust/) runs it fast on CPU, on a server, or i
 - **PyTorch wins:** prompt processing (TTFT), up to 1.9× faster, because its matrix math is faster on this CPU.
 - **A GPU beats both** (RTX A6000: 132 tok/s).
 
+### What Rust covers
+
+| Component | What it does | Achievement |
+|---|---|---|
+| **Tokenizer** ([`rust/tokenizer`](rust/tokenizer/)) | BPE training + encode/decode (`nanochat-vlm train-tokenizer`) | Merges identical to `rustbpe`; encoding identical to tiktoken |
+| **Data prep** ([`rust/dataprep`](rust/dataprep/)) | Parquet text → pre-tokenized `.bin` shards (`prepare-data`) | Token streams identical to the Python pipeline; ~7× faster |
+| **Image preprocessing** ([`rust/preprocessing`](rust/preprocessing/)) | Decode, resize, patchify | Bit-exact with PIL + torchvision; 3× faster |
+| **Multimodal data loader** ([`rust/data`](rust/data/)) | Streams image-text batches | Batches identical to the reference; 3.9× faster |
+| **Inference engine** ([`rust/inference`](rust/inference/)) | GPT + projector, KV cache, fused CPU kernels | Logits within ~1e-6; greedy tokens identical; 1.6× faster decoding |
+| **Evaluation** ([`rust/eval`](rust/eval/)) | Bits-per-byte and CORE metric (`eval-bpb`, `eval-core`) | Same scores as `loss_eval.py` / `base_eval.py` |
+| **Deployment** ([`cli`](rust/cli/), [`server`](rust/server/), [`wasm`](rust/wasm/)) | CLI, REST API with streaming, browser build | Server scales to 71 tok/s at 8 concurrent requests |
+
+Rust is now the largest language in the repo (~5.2k lines vs ~5.0k Python). Training stays in PyTorch on GPU.
+
 Details, tests and full results: [`rust/README.md`](rust/README.md).
 
 ---

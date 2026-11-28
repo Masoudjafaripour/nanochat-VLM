@@ -104,6 +104,38 @@ enum Cmd {
         #[arg(long)]
         max_train_files: Option<usize>,
     },
+    /// Bits per byte on pre-tokenized shards (loss_eval.py), on the Rust engine.
+    EvalBpb {
+        #[arg(long)]
+        model: PathBuf,
+        /// Output dir of `prepare-data`
+        #[arg(long)]
+        data_dir: PathBuf,
+        #[arg(long, default_value = "val")]
+        split: String,
+        #[arg(long, default_value_t = 8)]
+        batch_size: usize,
+        #[arg(long, default_value_t = 512)]
+        seq_len: usize,
+        #[arg(long, default_value_t = 10)]
+        steps: usize,
+    },
+    /// CORE metric on an eval bundle (core.yaml, eval_meta_data.csv, eval_data/), like base_eval.py.
+    EvalCore {
+        #[arg(long)]
+        model: PathBuf,
+        /// default: ~/.cache/nanochat/eval_bundle
+        #[arg(long)]
+        bundle: Option<PathBuf>,
+        #[arg(long)]
+        max_per_task: Option<usize>,
+        /// Print the full result as JSON on stdout.
+        #[arg(long)]
+        json: bool,
+        /// Write every rendered prompt (JSONL) here, for debugging/parity checks.
+        #[arg(long)]
+        dump_prompts: Option<PathBuf>,
+    },
     /// Print an export's configuration.
     Info {
         #[arg(long)]
@@ -233,6 +265,43 @@ fn main() -> anyhow::Result<()> {
             }
             std::fs::write(out.join("meta.json"), serde_json::to_string_pretty(&meta)?)?;
             println!("done in {:.1}s -> {}", t0.elapsed().as_secs_f64(), out.display());
+        }
+        Cmd::EvalBpb { model, data_dir, split, batch_size, seq_len, steps } => {
+            let engine = Engine::load(&model, &Device::Cpu, DType::F32)?;
+            let tok = engine.tokenizer()?;
+            let mut shards: Vec<PathBuf> = std::fs::read_dir(&data_dir)?
+                .filter_map(|e| e.ok().map(|e| e.path()))
+                .filter(|p| p.file_name().is_some_and(|n| n.to_string_lossy().starts_with(&format!("{split}_")) && n.to_string_lossy().ends_with(".bin")))
+                .collect();
+            shards.sort();
+            anyhow::ensure!(!shards.is_empty(), "no {split}_*.bin in {}", data_dir.display());
+            let mut tokens = Vec::new();
+            for s in &shards {
+                tokens.extend(vlm_dataprep::read_shard(s)?);
+            }
+            let tb = vlm_eval::token_bytes(tok, engine.model.cfg.model.vocab_size);
+            let t0 = Instant::now();
+            let (bpb, nats, bytes) = vlm_eval::bpb::evaluate(&engine.model, &tokens, batch_size, seq_len, steps, &tb)?;
+            println!("{}", serde_json::json!({"bpb": bpb, "nats": nats, "bytes": bytes, "seconds": t0.elapsed().as_secs_f64()}));
+        }
+        Cmd::EvalCore { model, bundle, max_per_task, json, dump_prompts } => {
+            let engine = Engine::load(&model, &Device::Cpu, DType::F32)?;
+            let bundle = bundle.unwrap_or_else(|| {
+                PathBuf::from(std::env::var("HOME").unwrap_or_default()).join(".cache/nanochat/eval_bundle")
+            });
+            let mut dump = match &dump_prompts {
+                Some(p) => Some(std::io::BufWriter::new(std::fs::File::create(p)?)),
+                None => None,
+            };
+            let dump_ref = dump.as_mut().map(|w| w as &mut dyn std::io::Write);
+            let r = vlm_eval::core::evaluate_bundle(&engine.model, engine.tokenizer()?, &bundle, max_per_task, dump_ref, |l, a, c| {
+                eprintln!("{l:<35} accuracy {a:.4} | centered {c:.4}");
+            })?;
+            if json {
+                println!("{}", serde_json::to_string(&r)?);
+            } else {
+                println!("CORE metric: {:.4}", r.core_metric);
+            }
         }
         Cmd::Info { model } => {
             let cfg = vlm_inference::config::ModelConfig::from_file(model.join("config.json"))?;

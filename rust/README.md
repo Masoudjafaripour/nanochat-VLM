@@ -12,6 +12,7 @@ rust/
 ├── tokenizer/        BPE training (port of rustbpe) + tiktoken-compatible encode  (vlm-tokenizer)
 ├── data/             JSONL manifest → sharded, shuffled, prefetched batches        (vlm-data)
 ├── dataprep/         parquet text shards → pre-tokenized .bin shards for training (vlm-dataprep)
+├── eval/             bits-per-byte + CORE metric on the Rust engine               (vlm-eval)
 ├── inference/        GPT + VisionProjector in Candle, KV cache, sampling, BPE      (vlm-inference)
 ├── bindings/         PyO3 module `nanochat_vlm_rs` (NumPy in/out, GIL released)    (vlm-bindings)
 ├── cli/              `nanochat-vlm` binary                                         (vlm-cli)
@@ -55,6 +56,13 @@ Pretraining data prep (same file order, train/val split and BOS-per-document as 
 ```bash
 rust/target/release/nanochat-vlm prepare-data --tokenizer tokenizer.json --out ~/.cache/nanochat/tokens
 # training side: rust/scripts/pretokenized_loader.py -> pretokenized_data_loader(dir, B, T, "train", rank, world_size)
+```
+
+Evaluation on the Rust engine (CPU; scores match `base_eval.py` / `loss_eval.py`):
+
+```bash
+rust/target/release/nanochat-vlm eval-bpb  --model rust/artifacts/d20 --data-dir ~/.cache/nanochat/tokens
+rust/target/release/nanochat-vlm eval-core --model rust/artifacts/d20 --max-per-task 100   # ~/.cache/nanochat/eval_bundle
 ```
 
 From Python, the existing PyTorch code can use the Rust pieces directly:
