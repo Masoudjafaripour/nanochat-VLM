@@ -148,3 +148,25 @@ impl PyTokenizer {
         self.inner.vocab_size()
     }
 }
+
+/// Train a BPE tokenizer (Rust port of rustbpe) and return tokenizer.json text.
+#[pyfunction]
+#[pyo3(signature = (texts, vocab_size, pattern=None, special_tokens=None))]
+pub fn train_tokenizer(
+    py: Python<'_>,
+    texts: Vec<String>,
+    vocab_size: u32,
+    pattern: Option<String>,
+    special_tokens: Option<Vec<String>>,
+) -> PyResult<String> {
+    use vlm_inference::tokenizer::{Trainer, NANOCHAT_PATTERN, SPECIAL_TOKENS_VLM};
+    let pat = pattern.unwrap_or_else(|| NANOCHAT_PATTERN.to_string());
+    let special: Vec<String> = special_tokens.unwrap_or_else(|| SPECIAL_TOKENS_VLM.iter().map(|s| s.to_string()).collect());
+    py.allow_threads(|| -> anyhow::Result<String> {
+        let mut t = Trainer::new(&pat)?;
+        t.feed(&texts);
+        let refs: Vec<&str> = special.iter().map(|s| s.as_str()).collect();
+        Ok(t.train(vocab_size).to_json(&refs))
+    })
+    .map_err(rt)
+}

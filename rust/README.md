@@ -9,6 +9,7 @@ was modified. Everything here only *reads* their artifacts or imports their modu
 rust/
 ├── Cargo.toml        workspace
 ├── preprocessing/    image decode, Pillow-exact resize, normalize, patchify      (vlm-preprocessing)
+├── tokenizer/        BPE training (port of rustbpe) + tiktoken-compatible encode  (vlm-tokenizer)
 ├── data/             JSONL manifest → sharded, shuffled, prefetched batches        (vlm-data)
 ├── inference/        GPT + VisionProjector in Candle, KV cache, sampling, BPE      (vlm-inference)
 ├── bindings/         PyO3 module `nanochat_vlm_rs` (NumPy in/out, GIL released)    (vlm-bindings)
@@ -102,6 +103,8 @@ for a frozen, production checkpoint.
 * **Export format.** `export_checkpoint.py` writes `config.json` + `model.safetensors` (same tensor names
   as the PyTorch state dict, projector under `projector.`) + `tokenizer.json`. The safetensors file is
   written by hand, because the `safetensors` package isn't in the venv.
+* **Tokenizer.** `tokenizer/` ports rustbpe's training (merges tested identical to `rustbpe`,
+  `nanochat-vlm train-tokenizer` / `rs.train_tokenizer`), leaving `rustbpe/` untouched.
 * **Tokenizer reuse.** `rustbpe/` is a PyO3 extension module that can't be linked into a native binary,
   so it isn't touched. The *artifact* it produces (split regex + mergeable ranks, which Python wraps in
   `tiktoken.Encoding`) is exported to JSON, and `inference/src/tokenizer.rs` runs tiktoken's merge

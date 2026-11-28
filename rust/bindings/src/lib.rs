@@ -146,6 +146,7 @@ fn nanochat_vlm_rs(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_class::<inference::PyEngine>()?;
     m.add_class::<inference::PyTokenizer>()?;
     m.add_class::<data::PyDataLoader>()?;
+    m.add_function(wrap_pyfunction!(inference::train_tokenizer, m)?)?;
     m.add_function(wrap_pyfunction!(load_and_resize, m)?)?;
     m.add_function(wrap_pyfunction!(preprocess, m)?)?;
     m.add_function(wrap_pyfunction!(preprocess_bytes, m)?)?;

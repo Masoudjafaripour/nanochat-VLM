@@ -4,7 +4,7 @@
 //! * [`model`]     GPT + VisionProjector, op-for-op with `nanochat_vlm/gpt.py`
 //! * [`kv_cache`]  preallocated and concat KV caches
 //! * [`sampling`]  greedy / temperature / top-k / top-p
-//! * [`tokenizer`] tiktoken-compatible BPE from the rustbpe artifact
+//! * [`tokenizer`] re-export of the `vlm-tokenizer` crate
 //! * [`attention`] fused CPU causal attention (reads the KV cache in place)
 //! * [`engine`]    prompt assembly, prefill + decode loop, timing statistics
 

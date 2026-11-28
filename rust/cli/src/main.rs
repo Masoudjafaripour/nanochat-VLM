@@ -76,6 +76,18 @@ enum Cmd {
         #[arg(long, default_value_t = 16)]
         patch_size: usize,
     },
+    /// Train a BPE tokenizer on text files (one document per line) -> tokenizer.json.
+    TrainTokenizer {
+        #[arg(long, num_args = 1.., required = true)]
+        input: Vec<PathBuf>,
+        #[arg(long, default_value_t = 65536)]
+        vocab_size: u32,
+        #[arg(long)]
+        out: PathBuf,
+        /// Stop after this many characters (nanochat's tok_train.py uses ~2B).
+        #[arg(long)]
+        max_chars: Option<usize>,
+    },
     /// Print an export's configuration.
     Info {
         #[arg(long)]
@@ -154,6 +166,37 @@ fn main() -> anyhow::Result<()> {
             let ms = t.elapsed().as_secs_f64() * 1e3;
             let mean = p.data.iter().map(|&v| v as f64).sum::<f64>() / p.data.len() as f64;
             println!("patches: ({}, {})  mean={mean:.6}  time={ms:.2} ms", p.num_patches, p.patch_dim);
+        }
+        Cmd::TrainTokenizer { input, vocab_size, out, max_chars } => {
+            use std::io::BufRead;
+            use vlm_inference::tokenizer::{Trainer, NANOCHAT_PATTERN, SPECIAL_TOKENS_VLM};
+            let t0 = Instant::now();
+            let n_special = SPECIAL_TOKENS_VLM.len() as u32;
+            anyhow::ensure!(vocab_size >= 256 + n_special, "vocab_size too small");
+            let mut trainer = Trainer::new(NANOCHAT_PATTERN)?;
+            let (mut chars, mut batch) = (0usize, Vec::with_capacity(8192));
+            'files: for path in &input {
+                let f = std::io::BufReader::new(std::fs::File::open(path).with_context(|| path.display().to_string())?);
+                for line in f.lines() {
+                    let line = line?;
+                    chars += line.len();
+                    batch.push(line);
+                    if batch.len() == 8192 {
+                        trainer.feed(&batch);
+                        batch.clear();
+                    }
+                    if max_chars.is_some_and(|m| chars >= m) {
+                        break 'files;
+                    }
+                }
+            }
+            trainer.feed(&batch);
+            let bpe = trainer.train(vocab_size - n_special);
+            std::fs::write(&out, bpe.to_json(&SPECIAL_TOKENS_VLM))?;
+            println!(
+                "trained {} merges on {:.1} MB in {:.1} s -> {}",
+                bpe.merges.len(), chars as f64 / 1e6, t0.elapsed().as_secs_f64(), out.display()
+            );
         }
         Cmd::Info { model } => {
             let cfg = vlm_inference::config::ModelConfig::from_file(model.join("config.json"))?;
