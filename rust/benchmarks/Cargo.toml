@@ -1,0 +1,25 @@
+[package]
+name = "vlm-benchmarks"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Native benchmark driver for nanochat-VLM Rust components"
+
+[[bin]]
+name = "vlm-bench"
+path = "src/main.rs"
+
+[dependencies]
+vlm-inference = { path = "../inference" }
+vlm-preprocessing = { path = "../preprocessing" }
+candle-core = { workspace = true }
+candle-nn = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
+rayon = { workspace = true }
+rand = { workspace = true }
+
+[features]
+cuda = ["vlm-inference/cuda"]
+mkl = ["vlm-inference/mkl"]

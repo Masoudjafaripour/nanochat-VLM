@@ -1,0 +1,28 @@
+[package]
+name = "vlm-server"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Axum REST API for nanochat-VLM inference"
+
+[[bin]]
+name = "nanochat-vlm-server"
+path = "src/main.rs"
+
+[dependencies]
+vlm-inference = { path = "../inference" }
+vlm-preprocessing = { path = "../preprocessing" }
+candle-core = { workspace = true }
+axum = { workspace = true }
+tokio = { workspace = true }
+tokio-stream = { workspace = true }
+futures = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+base64 = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+
+[features]
+cuda = ["vlm-inference/cuda"]
+mkl = ["vlm-inference/mkl"]

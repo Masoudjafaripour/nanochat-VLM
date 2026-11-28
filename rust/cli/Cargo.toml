@@ -1,0 +1,22 @@
+[package]
+name = "vlm-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Command-line inference for nanochat-VLM"
+
+[[bin]]
+name = "nanochat-vlm"
+path = "src/main.rs"
+
+[dependencies]
+vlm-inference = { path = "../inference" }
+vlm-preprocessing = { path = "../preprocessing" }
+candle-core = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
+
+[features]
+cuda = ["vlm-inference/cuda"]
+mkl = ["vlm-inference/mkl"]

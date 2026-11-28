@@ -1,0 +1,280 @@
+{
+  "meta": {
+    "cpu": "AMD EPYC 7452 32-Core Processor (64 cores)",
+    "gpu": "NVIDIA RTX A6000",
+    "date": "2026-11-28",
+    "threads": 16,
+    "params_m": 186.19
+  },
+  "preprocess": {
+    "rust_native": {
+      "batch_images_per_s": 576.1410865815643,
+      "batch_ms_median": 55.541951,
+      "images": 32,
+      "impl": "rust",
+      "single_ms_median": 9.319049,
+      "threads": 16
+    },
+    "python": {
+      "impl": "python-pil-torchvision",
+      "images": 32,
+      "threads": 64,
+      "single_ms_median": 29.128157533705235,
+      "batch_ms_median": 124.46693098172545,
+      "batch_images_per_s": 257.09640100870104
+    },
+    "rust_pyo3": {
+      "single_ms_median": 7.8392361756414175,
+      "batch_ms_median": 65.95452409237623,
+      "batch_images_per_s": 485.18278981409435
+    }
+  },
+  "dataloader": {
+    "samples": 128,
+    "batch_size": 32,
+    "workers": 8,
+    "rust_samples_per_s": 716.0506061053225,
+    "torch_dataloader_samples_per_s": 63.12900407139796
+  },
+  "inference": [
+    {
+      "attn": "fused",
+      "decode_tok_s": 30.203103073468718,
+      "impl": "rust-candle-cpu",
+      "kv": "preallocated",
+      "kv_cache_mib": 25.03125,
+      "load_ms": 347.843439,
+      "new_tokens": 128,
+      "peak_rss_mib": 1450.62109375,
+      "prefill_ms": 223.227227,
+      "prompt_positions": 228,
+      "threads": 16,
+      "ttft_ms": 225.66915000000003,
+      "label": "Rust Candle CPU (fused kernels)"
+    },
+    {
+      "attn": "composed",
+      "decode_tok_s": 28.25084441456967,
+      "impl": "rust-candle-cpu",
+      "kv": "preallocated",
+      "kv_cache_mib": 25.03125,
+      "load_ms": 345.764478,
+      "new_tokens": 128,
+      "peak_rss_mib": 1450.62109375,
+      "prefill_ms": 338.30724899999996,
+      "prompt_positions": 228,
+      "threads": 16,
+      "ttft_ms": 341.386104,
+      "label": "Rust Candle CPU (plain candle ops)"
+    },
+    {
+      "impl": "pytorch-cpu",
+      "kv": "cache",
+      "prompt_positions": 228,
+      "new_tokens": 128,
+      "ttft_ms": 177.97257006168365,
+      "decode_tok_s": 20.441136703322993,
+      "load_ms": 3116.593620739877,
+      "peak_rss_mib": 1713.33984375,
+      "threads": 16,
+      "label": "PyTorch CPU (engine.KVCache)"
+    },
+    {
+      "impl": "pytorch-cuda",
+      "kv": "cache",
+      "prompt_positions": 228,
+      "new_tokens": 128,
+      "ttft_ms": 11.62501098588109,
+      "decode_tok_s": 130.93618930760874,
+      "load_ms": 3388.853234704584,
+      "peak_rss_mib": 1509.703125,
+      "threads": 16,
+      "peak_cuda_mib": 924.97265625,
+      "label": "PyTorch CUDA fp32 (reference)",
+      "note": "different hardware;"
+    },
+    {
+      "attn": "fused",
+      "decode_tok_s": 25.42592246317046,
+      "impl": "rust-candle-cpu",
+      "kv": "preallocated",
+      "kv_cache_mib": 72.28125,
+      "load_ms": 343.730506,
+      "new_tokens": 32,
+      "peak_rss_mib": 1450.62109375,
+      "prefill_ms": 1329.4311500000001,
+      "prompt_positions": 996,
+      "threads": 16,
+      "ttft_ms": 1334.2677049999998,
+      "label": "Rust Candle CPU (fused kernels)"
+    },
+    {
+      "attn": "composed",
+      "decode_tok_s": 17.97602898158946,
+      "impl": "rust-candle-cpu",
+      "kv": "preallocated",
+      "kv_cache_mib": 72.28125,
+      "load_ms": 361.585659,
+      "new_tokens": 32,
+      "peak_rss_mib": 1450.62109375,
+      "prefill_ms": 2086.000744,
+      "prompt_positions": 996,
+      "threads": 16,
+      "ttft_ms": 2091.018681,
+      "label": "Rust Candle CPU (plain candle ops)"
+    },
+    {
+      "impl": "pytorch-cpu",
+      "kv": "cache",
+      "prompt_positions": 996,
+      "new_tokens": 32,
+      "ttft_ms": 687.2545317746699,
+      "decode_tok_s": 20.853796247177602,
+      "load_ms": 2614.153414964676,
+      "peak_rss_mib": 2353.828125,
+      "threads": 16,
+      "label": "PyTorch CPU (engine.KVCache)"
+    },
+    {
+      "impl": "pytorch-cuda",
+      "kv": "cache",
+      "prompt_positions": 996,
+      "new_tokens": 32,
+      "ttft_ms": 23.79351481795311,
+      "decode_tok_s": 131.42166296506733,
+      "load_ms": 3386.0411290079355,
+      "peak_rss_mib": 1511.16796875,
+      "threads": 16,
+      "peak_cuda_mib": 1551.75390625,
+      "label": "PyTorch CUDA fp32 (reference)",
+      "note": "different hardware;"
+    }
+  ],
+  "kv": [
+    {
+      "attn": "fused",
+      "decode_tok_s": 28.49956655850744,
+      "impl": "rust-candle-cpu",
+      "kv": "preallocated",
+      "kv_cache_mib": 11.25,
+      "load_ms": 348.622002,
+      "new_tokens": 128,
+      "peak_rss_mib": 1450.62109375,
+      "prefill_ms": 80.630082,
+      "prompt_positions": 32,
+      "threads": 16,
+      "ttft_ms": 80.799293,
+      "label": "Rust preallocated"
+    },
+    {
+      "attn": "fused",
+      "decode_tok_s": 28.269986802426008,
+      "impl": "rust-candle-cpu",
+      "kv": "concat",
+      "kv_cache_mib": 11.1796875,
+      "load_ms": 353.91015,
+      "new_tokens": 128,
+      "peak_rss_mib": 1450.62109375,
+      "prefill_ms": 78.772892,
+      "prompt_positions": 32,
+      "threads": 16,
+      "ttft_ms": 78.96581300000001,
+      "label": "Rust concat"
+    },
+    {
+      "impl": "pytorch-cpu",
+      "kv": "cache",
+      "prompt_positions": 32,
+      "new_tokens": 128,
+      "ttft_ms": 64.46160702034831,
+      "decode_tok_s": 17.474895114222015,
+      "load_ms": 3102.6458269916475,
+      "peak_rss_mib": 1533.95703125,
+      "threads": 16,
+      "label": "PyTorch engine.KVCache"
+    },
+    {
+      "impl": "pytorch-cpu",
+      "kv": "nocache",
+      "prompt_positions": 32,
+      "new_tokens": 128,
+      "ttft_ms": 66.5452191606164,
+      "decode_tok_s": 10.604346021846867,
+      "load_ms": 3092.0340823940933,
+      "peak_rss_mib": 1894.2109375,
+      "threads": 16,
+      "label": "PyTorch no cache (128 tokens)"
+    }
+  ],
+  "threads": [
+    {
+      "threads": 4,
+      "rust_ttft_ms": 372.735359,
+      "rust_decode": 30.99380502024016,
+      "torch_ttft_ms": 395.83223895169795,
+      "torch_decode": 22.64367337988962
+    },
+    {
+      "threads": 8,
+      "rust_ttft_ms": 309.094895,
+      "rust_decode": 29.843160645861797,
+      "torch_ttft_ms": 221.45480243489146,
+      "torch_decode": 19.7564939673968
+    },
+    {
+      "threads": 16,
+      "rust_ttft_ms": 225.59879899999999,
+      "rust_decode": 30.36267538959037,
+      "torch_ttft_ms": 184.02878707274795,
+      "torch_decode": 19.585456353103204
+    },
+    {
+      "threads": 32,
+      "rust_ttft_ms": 204.365498,
+      "rust_decode": 28.190840609099048,
+      "torch_ttft_ms": 133.01769481040537,
+      "torch_decode": 19.639898290234242
+    },
+    {
+      "threads": 64,
+      "rust_ttft_ms": 240.253505,
+      "rust_decode": 16.76889287587288,
+      "torch_ttft_ms": 3418.848460074514,
+      "torch_decode": 9.128725422916563
+    }
+  ],
+  "concurrency": [
+    {
+      "concurrency": 1,
+      "requests": 2,
+      "aggregate_tok_s": 18.290560191325913,
+      "p50_latency_s": 1.7490256868768483,
+      "p50_ttft_ms": 371.82986300000005,
+      "new_tokens": 32
+    },
+    {
+      "concurrency": 2,
+      "requests": 4,
+      "aggregate_tok_s": 33.86547230347961,
+      "p50_latency_s": 1.8646515358705074,
+      "p50_ttft_ms": 465.07732550000003,
+      "new_tokens": 32
+    },
+    {
+      "concurrency": 4,
+      "requests": 8,
+      "aggregate_tok_s": 50.982019990628096,
+      "p50_latency_s": 2.4170311633497477,
+      "p50_ttft_ms": 612.23468,
+      "new_tokens": 32
+    },
+    {
+      "concurrency": 8,
+      "requests": 16,
+      "aggregate_tok_s": 71.5915190388497,
+      "p50_latency_s": 3.5704445424489677,
+      "p50_ttft_ms": 697.0436784999999,
+      "new_tokens": 32
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+[package]
+name = "vlm-inference"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Candle-based inference engine for nanochat-VLM (projector + GPT + KV cache + sampling)"
+
+[dependencies]
+vlm-preprocessing = { path = "../preprocessing" }
+candle-core = { workspace = true }
+candle-nn = { workspace = true }
+fancy-regex = { workspace = true }
+base64 = { workspace = true }
+rand = { workspace = true }
+ahash = { workspace = true }
+rayon = { workspace = true }
+web-time = "1"
+serde = { workspace = true }
+serde_json = { workspace = true }
+anyhow = { workspace = true }
+intel-mkl-src = { version = "0.8", features = ["mkl-static-lp64-iomp"], optional = true }
+
+[features]
+default = []
+# GPU backend. Needs a CUDA toolkit (nvcc) at build time.
+cuda = ["candle-core/cuda", "candle-nn/cuda"]
+# Intel MKL GEMM on CPU (downloads MKL at build time).
+mkl = ["candle-core/mkl", "candle-nn/mkl", "dep:intel-mkl-src"]

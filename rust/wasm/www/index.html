@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>nanochat-VLM · in-browser inference</title>
+<style>
+  :root { color-scheme: light dark; --fg: #1d1d1f; --muted: #6e6e73; --bg: #fafafa; --card: #fff; --line: #e3e3e6; --accent: #2b6cb0; }
+  @media (prefers-color-scheme: dark) { :root { --fg: #eaeaea; --muted: #9a9aa0; --bg: #141416; --card: #1d1d20; --line: #2c2c31; --accent: #6ea8fe; } }
+  body { font: 15px/1.5 system-ui, sans-serif; color: var(--fg); background: var(--bg); max-width: 760px; margin: 2rem auto; padding: 0 1rem; }
+  h1 { font-size: 1.4rem; margin-bottom: .2rem; }
+  p.sub { color: var(--muted); margin-top: 0; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 1rem; margin: 1rem 0; }
+  label { display: block; font-size: .85rem; color: var(--muted); margin: .6rem 0 .2rem; }
+  input[type=text], textarea { width: 100%; box-sizing: border-box; font: inherit; padding: .5rem; border-radius: 6px; border: 1px solid var(--line); background: transparent; color: inherit; }
+  .row { display: flex; gap: 1rem; flex-wrap: wrap; align-items: end; }
+  .row > div { flex: 1; min-width: 120px; }
+  button { font: inherit; padding: .5rem 1rem; border-radius: 6px; border: 0; background: var(--accent); color: #fff; cursor: pointer; }
+  button:disabled { opacity: .5; cursor: default; }
+  #out { white-space: pre-wrap; min-height: 4rem; font-family: ui-monospace, monospace; }
+  #stats, #status { color: var(--muted); font-size: .85rem; font-family: ui-monospace, monospace; white-space: pre-wrap; }
+  img#preview { max-width: 160px; border-radius: 6px; display: none; margin-top: .5rem; }
+</style>
+</head>
+<body>
+<h1>nanochat-VLM in the browser</h1>
+<p class="sub">The Rust preprocessing + Candle inference engine compiled to WebAssembly. Nothing leaves this page.</p>
+
+<div class="card">
+  <label for="base">Export directory (served next to this page)</label>
+  <input id="base" type="text" value="model/">
+  <div style="margin-top:.6rem"><button id="load">Load model</button></div>
+  <div id="status">not loaded</div>
+</div>
+
+<div class="card">
+  <label for="img">Image (optional)</label>
+  <input id="img" type="file" accept="image/png,image/jpeg">
+  <img id="preview" alt="selected image preview">
+  <label for="prompt">Prompt</label>
+  <textarea id="prompt" rows="2">Describe the image.</textarea>
+  <div class="row">
+    <div><label for="max">Max new tokens</label><input id="max" type="text" value="64"></div>
+    <div><label for="temp">Temperature</label><input id="temp" type="text" value="0"></div>
+    <div><button id="go" disabled>Generate</button></div>
+  </div>
+</div>
+
+<div class="card">
+  <div id="out"></div>
+  <div id="stats"></div>
+</div>
+
+<script type="module">
+// Generation runs in a Web Worker so the page stays responsive.
+const worker = new Worker(new URL("./worker.js", import.meta.url), { type: "module" });
+const $ = (id) => document.getElementById(id);
+let imageBytes = null;
+
+$("img").onchange = async (e) => {
+  const f = e.target.files[0];
+  imageBytes = f ? new Uint8Array(await f.arrayBuffer()) : null;
+  $("preview").style.display = f ? "block" : "none";
+  if (f) $("preview").src = URL.createObjectURL(f);
+};
+$("load").onclick = () => { $("status").textContent = "loading…"; worker.postMessage({ type: "load", base: $("base").value }); };
+$("go").onclick = () => {
+  $("out").textContent = ""; $("stats").textContent = "";
+  $("go").disabled = true;
+  worker.postMessage({ type: "generate", prompt: $("prompt").value, image: imageBytes,
+                       maxNewTokens: parseInt($("max").value, 10), temperature: parseFloat($("temp").value) });
+};
+worker.onmessage = ({ data }) => {
+  if (data.type === "loaded") { $("status").textContent = data.info; $("go").disabled = false; }
+  else if (data.type === "token") $("out").textContent += data.text;
+  else if (data.type === "done") { $("stats").textContent = JSON.stringify(data.stats, null, 1); $("go").disabled = false; }
+  else if (data.type === "error") { $("status").textContent = "error: " + data.message; $("go").disabled = false; }
+};
+</script>
+</body>
+</html>

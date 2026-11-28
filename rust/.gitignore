@@ -1,0 +1,7 @@
+target/
+*.so
+/artifacts/
+target-mkl/
+/wasm/www/pkg/
+/wasm/www/model/
+/benchmarks/results/run.log

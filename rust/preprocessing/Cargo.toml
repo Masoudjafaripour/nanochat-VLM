@@ -1,0 +1,14 @@
+[package]
+name = "vlm-preprocessing"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Image loading, PIL-compatible resize, normalization and patchification for nanochat-VLM"
+
+[dependencies]
+image = { workspace = true }
+rayon = { workspace = true }
+thiserror = { workspace = true }
+
+[features]
+default = []

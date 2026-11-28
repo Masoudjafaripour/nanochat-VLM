@@ -1,0 +1,22 @@
+[package]
+name = "vlm-wasm"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Browser (WebAssembly) build of nanochat-VLM preprocessing and inference"
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+vlm-inference = { path = "../inference" }
+vlm-preprocessing = { path = "../preprocessing" }
+candle-core = { workspace = true }
+wasm-bindgen = "0.2"
+js-sys = "0.3"
+serde_json = { workspace = true }
+console_error_panic_hook = "0.1"
+
+[target.'cfg(target_arch = "wasm32")'.dependencies]
+getrandom = { version = "0.2", features = ["js"] }
+getrandom3 = { package = "getrandom", version = "0.3", features = ["wasm_js"] }
