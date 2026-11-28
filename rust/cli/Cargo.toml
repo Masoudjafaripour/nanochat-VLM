@@ -12,6 +12,7 @@ path = "src/main.rs"
 [dependencies]
 vlm-inference = { path = "../inference" }
 vlm-preprocessing = { path = "../preprocessing" }
+vlm-dataprep = { path = "../dataprep" }
 candle-core = { workspace = true }
 clap = { workspace = true }
 anyhow = { workspace = true }

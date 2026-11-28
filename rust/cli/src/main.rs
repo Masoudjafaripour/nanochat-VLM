@@ -88,6 +88,22 @@ enum Cmd {
         #[arg(long)]
         max_chars: Option<usize>,
     },
+    /// Tokenize parquet text shards (FineWeb layout) into .bin token shards for training.
+    PrepareData {
+        /// Directory with *.parquet files (default: ~/.cache/nanochat/base_data). Last file = val.
+        #[arg(long)]
+        data_dir: Option<PathBuf>,
+        /// tokenizer.json (from train-tokenizer or export_checkpoint.py)
+        #[arg(long)]
+        tokenizer: PathBuf,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long, default_value_t = 100_000_000)]
+        shard_tokens: usize,
+        /// Only use the first N train files (quick runs).
+        #[arg(long)]
+        max_train_files: Option<usize>,
+    },
     /// Print an export's configuration.
     Info {
         #[arg(long)]
@@ -197,6 +213,26 @@ fn main() -> anyhow::Result<()> {
                 "trained {} merges on {:.1} MB in {:.1} s -> {}",
                 bpe.merges.len(), chars as f64 / 1e6, t0.elapsed().as_secs_f64(), out.display()
             );
+        }
+        Cmd::PrepareData { data_dir, tokenizer, out, shard_tokens, max_train_files } => {
+            let dir = data_dir.unwrap_or_else(|| {
+                PathBuf::from(std::env::var("HOME").unwrap_or_default()).join(".cache/nanochat/base_data")
+            });
+            let tok = vlm_inference::tokenizer::Tokenizer::from_file(&tokenizer)?;
+            let files = vlm_dataprep::list_parquet_files(&dir)?;
+            anyhow::ensure!(files.len() >= 2, "need at least 2 parquet files in {} (last one is val)", dir.display());
+            let (train, val) = files.split_at(files.len() - 1);
+            let train = &train[..max_train_files.unwrap_or(train.len()).min(train.len())];
+            let t0 = Instant::now();
+            let mut meta = serde_json::json!({"tokenizer": tokenizer.display().to_string(), "format": "NCVTOK01"});
+            for (split, fs) in [("val", val), ("train", train)] {
+                let st = vlm_dataprep::prepare_split(&tok, fs, &out, split, shard_tokens, |f, docs, toks| {
+                    eprintln!("[{split}] {} -> {docs} docs, {toks} tokens ({:.0}s)", f.display(), t0.elapsed().as_secs_f64());
+                })?;
+                meta[split] = serde_json::json!({"files": st.files, "docs": st.docs, "tokens": st.tokens, "shards": st.shards});
+            }
+            std::fs::write(out.join("meta.json"), serde_json::to_string_pretty(&meta)?)?;
+            println!("done in {:.1}s -> {}", t0.elapsed().as_secs_f64(), out.display());
         }
         Cmd::Info { model } => {
             let cfg = vlm_inference::config::ModelConfig::from_file(model.join("config.json"))?;

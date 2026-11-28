@@ -11,6 +11,7 @@ rust/
 ├── preprocessing/    image decode, Pillow-exact resize, normalize, patchify      (vlm-preprocessing)
 ├── tokenizer/        BPE training (port of rustbpe) + tiktoken-compatible encode  (vlm-tokenizer)
 ├── data/             JSONL manifest → sharded, shuffled, prefetched batches        (vlm-data)
+├── dataprep/         parquet text shards → pre-tokenized .bin shards for training (vlm-dataprep)
 ├── inference/        GPT + VisionProjector in Candle, KV cache, sampling, BPE      (vlm-inference)
 ├── bindings/         PyO3 module `nanochat_vlm_rs` (NumPy in/out, GIL released)    (vlm-bindings)
 ├── cli/              `nanochat-vlm` binary                                         (vlm-cli)
@@ -46,6 +47,14 @@ curl localhost:8080/v1/generate -H 'content-type: application/json' \
 
 # Browser demo (needs wasm-bindgen-cli matching Cargo.lock)
 rust/wasm/build.sh rust/artifacts/random_d8 && python -m http.server -d rust/wasm/www 8000
+```
+
+Pretraining data prep (same file order, train/val split and BOS-per-document as `dataset.py` +
+`dataloader.py`; token streams tested identical):
+
+```bash
+rust/target/release/nanochat-vlm prepare-data --tokenizer tokenizer.json --out ~/.cache/nanochat/tokens
+# training side: rust/scripts/pretokenized_loader.py -> pretokenized_data_loader(dir, B, T, "train", rank, world_size)
 ```
 
 From Python, the existing PyTorch code can use the Rust pieces directly:

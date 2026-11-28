@@ -1,0 +1,14 @@
+[package]
+name = "vlm-dataprep"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+description = "Pretraining data prep: parquet text shards -> tokenized .bin shards"
+
+[dependencies]
+vlm-tokenizer = { path = "../tokenizer" }
+parquet = { workspace = true }
+arrow-array = { workspace = true }
+rayon = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true }
