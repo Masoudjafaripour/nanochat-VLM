@@ -3,12 +3,13 @@
 ### A minimal Vision-Language Model trained end-to-end in the spirit of Karpathy’s **[nanochat](https://github.com/karpathy/nanochat)**
 
 
-**nanochat-VLM** extends the original **nanochat** idea toward multimodality: training a small but complete **Vision-Language Model (VLM)** with the same philosophy—minimal code, full ownership, and clear learning value (hopefully with similar cost of training).
+**nanochat-VLM** brings nanochat to multimodality. It trains a small but complete **Vision-Language Model (VLM)** with the same philosophy: minimal code, full ownership, clear learning value.
 
-The **primary goal** of this repo is to **train a VLM end-to-end using nanochat-style scripts** (tokenizer → LM → multimodal training), not just to demo inference.
-A small set of notebooks is included as a **secondary, exploratory path** to understand and validate VLM components in isolation.
+- **Train in Python:** tokenizer → language model → vision projector → multimodal training, as nanochat-style scripts. This is the primary goal.
+- **Run in Rust:** fast preprocessing and data loading, plus CPU, server and browser inference that matches PyTorch's outputs ([`rust/`](rust/)).
+- **Explore in notebooks:** step-by-step checks of each VLM component ([`notebooks/`](notebooks/)).
 
-This project is designed for **learning, research, and hackability**, not scale.
+Built for **learning, research, and hackability**, not scale.
 
 ![VLM architecture: image patches through a frozen vision encoder and trained projector, fused with text tokens into the nanochat GPT decoder](assets/vlm_architecture.png)
 
@@ -158,6 +159,20 @@ python -m src.base_eval --max-per-task 100
 
 **Vision-Language exploration (secondary path):** open the notebooks in order —
 `ch1` → `ch2` → `ch3` → `ch4` → `ch5` → `ch6` in [`notebooks/`](notebooks/) — to walk through vision tokenization, projector training, fusion, forward pass, minimal training, and generation.
+
+---
+
+## 🦀 Rust Inference & Systems
+
+Python trains the model. [`rust/`](rust/) runs it fast on CPU, on a server, or in the browser: preprocessing, data loading, a Candle inference engine with a KV cache, a CLI, a REST API and WASM. Outputs match PyTorch (preprocessing is bit-exact, logits within ~1e-6).
+
+![Rust vs PyTorch CPU benchmarks](assets/rust_benchmarks.svg)
+
+- **Rust wins:** preprocessing, data loading, decode speed and memory.
+- **PyTorch wins:** prompt processing (TTFT), up to 1.9× faster, because its matrix math is faster on this CPU.
+- **A GPU beats both** (RTX A6000: 132 tok/s).
+
+Details, tests and full results: [`rust/README.md`](rust/README.md).
 
 ---
 

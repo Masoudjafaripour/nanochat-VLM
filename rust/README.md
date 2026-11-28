@@ -128,7 +128,7 @@ for a frozen, production checkpoint.
 | `cargo test` (18 tests) | resize invariants, patch layout, KV strategies, sampling, tokenizer, data-loader ordering/sharding/skips/shutdown, engine: fused == composed (MHA/MQA/GQA), `from_buffers` == file load, cached decode == full recompute, chunked prefill, stop tokens | all pass |
 | `tests/python/test_preprocessing_parity.py` | Rust vs PIL+torchvision on the repo's `sample.png`, 36 resize cases (6 sizes × 3 targets × 2 filters), RGBA, grayscale, CLIP-normalize + bicubic + 14 px patches, batch and bytes APIs | **bit-exact (max diff 0)**; JPEG differs by ≤ 3/255 (different decoder, documented) |
 | `tests/python/test_inference_parity.py` | logits vs PyTorch for text-only and image+text prompts on d4 MHA, d4 MQA and d6, for both attention paths; greedy decoding (24 tokens) with preallocated, concat and chunked-prefill caches vs `engine.KVCache`; text-only greedy vs the original `GPT.generate()`; tokenizer vs tiktoken | 45/45 pass, max relative logit error ≈ 1.5e-6, token-identical decoding |
-| `tests/python/test_dataloader.py` | every batch equals torchvision + tiktoken, deterministic order across worker counts, seeds, DDP sharding, epochs, corrupt files | see below |
+| `tests/python/test_dataloader.py` | every batch equals torchvision + tiktoken, deterministic order across worker counts, seeds, DDP sharding, epochs, corrupt files | 6/6 pass, batches exactly equal |
 
 ```bash
 python rust/tests/python/test_preprocessing_parity.py
@@ -140,7 +140,26 @@ python rust/tests/python/test_dataloader.py
 
 `python rust/benchmarks/run_benchmarks.py` (full tables in [benchmarks/results/results.md](benchmarks/results/results.md)).
 
-RESULTS_PLACEHOLDER
+Measured on an AMD EPYC 7452 (2 × 32 cores, Zen 2, no AVX-512) at 16 threads for both runtimes.
+Model: random-init d12 (186M params, vocab 65,536, fp32) + projector. Prompt: image + text, 228 positions.
+
+| metric | PyTorch | Rust | verdict |
+|---|---:|---:|---|
+| preprocess one image (ms, median) | 29.0 | 9.2 (7.8 via PyO3) | **Rust 3.1× faster** |
+| preprocess 32 images in parallel (img/s) | 263 | 594 | **Rust 2.3×** |
+| data loading (samples/s, 8 workers) | 203 (torch DataLoader) | 796 | **Rust 3.9×** |
+| TTFT, 228 positions (ms) | **174** | 225 | **PyTorch 1.3× faster** |
+| TTFT, 996 positions (ms) | **690** | 1,327 | **PyTorch 1.9× faster** (GEMM-bound prefill; MKL beats candle's `gemm`) |
+| decode (tok/s) | 19.6 | **31.0** | **Rust 1.6×** (lower per-op overhead at batch 1) |
+| peak RSS, 996 positions (MiB) | 2,354 | **1,451** | **Rust uses 38% less** |
+| fused kernels vs plain candle | – | TTFT 365 → 225 ms, decode 26 → 31 tok/s | worth keeping |
+| preallocated vs concat KV (512 tokens) | – | 30.1 vs 27.1 tok/s | ~11% gain |
+| 64 threads (TTFT ms) | 2,927 | 248 | PyTorch collapses across NUMA sockets; Rust degrades mildly |
+| server, 1 → 8 concurrent requests | – | 21 → 71 aggregate tok/s, p50 TTFT 231 → 606 ms | scales ~3.4× then saturates |
+| PyTorch on RTX A6000 (reference) | TTFT 12 ms, 132 tok/s | – | the GPU wins outright; Rust targets CPU, edge and browser |
+
+So Rust doesn't win automatically. It clearly wins on preprocessing, data loading, decode latency
+and memory. PyTorch still wins on compute-bound prefill on CPU, and a GPU beats both.
 
 ## Compatibility and limitations
 
